@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <process.h>
+
+#include "game.h"
 #include "winsock_server.h"
 
-SOCKET StartWinsock()
+void StartWinsock(CRITICAL_SECTION Cs)
 {
 	WSADATA wsadata;
 	WSAStartup(MAKEWORD(2, 2), &wsadata);
@@ -13,18 +16,26 @@ SOCKET StartWinsock()
         return 0;
     }
 
+    SOCKET sersock;
     SOCKADDR_IN cliaddr = { 0 };
     int len = sizeof(cliaddr);
-    sock = accept(sock, (SOCKADDR*)&cliaddr, &len);//연결 수락
 
-    if (sock == -1)
+    while (true) {
+
+        sersock = accept(sock, (SOCKADDR*)&cliaddr, &len);//연결 수락
+
+        if (sersock == -1)
         {
             perror("Accept 실패");
             return 0;
         }
-    printf("%s:%d의 연결 요청 수락\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
+        printf("%s:%d의 연결 요청 수락\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
+        _beginthread(Game, 0, sersock, Cs);
+    }
 
-    return sock;
+    closesocket(sock);
+    WSACleanup();
+
 }
 
 IN_ADDR GetDefaultMyIP()

@@ -1,7 +1,11 @@
 #define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable:4996)
 
 #include <winsock2.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <Windows.h>
+
 #include "game.h"
 
 player_t s_players[NUM_MAX_PLAYERS];
@@ -19,4 +23,10 @@ int InitGame()
 	}
 
 	return players_num = fread(s_players, sizeof(player_t), NUM_MAX_PLAYERS, pb);
+}
+
+void Game(SOCKET sock, CRITICAL_SECTION Cs)
+{
+	EnterCriticalSection(&Cs);
+	LeaveCriticalSection(&Cs);
 }
