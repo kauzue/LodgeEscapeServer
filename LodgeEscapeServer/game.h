@@ -25,5 +25,8 @@ typedef struct clue {
 	char information[MAX_MSG_LEN];
 } clue_t;
 
-int InitGame();
-void Game(SOCKET, CRITICAL_SECTION);
+enum LOG { SIGNUP, LOGIN};
+
+void InitGame();
+int Game(SOCKET);
+void CloseGame();

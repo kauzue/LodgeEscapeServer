@@ -1,10 +1,14 @@
+#pragma comment(lib,"ws2_32")
+#pragma warning(disable:4996)
+
 #include <stdio.h>
+#include <stdbool.h>
 #include <process.h>
 
 #include "game.h"
 #include "winsock_server.h"
 
-void StartWinsock(CRITICAL_SECTION Cs)
+void StartWinsock()
 {
 	WSADATA wsadata;
 	WSAStartup(MAKEWORD(2, 2), &wsadata);
@@ -16,26 +20,23 @@ void StartWinsock(CRITICAL_SECTION Cs)
         return 0;
     }
 
-    SOCKET sersock;
+    SOCKET serversock;
     SOCKADDR_IN cliaddr = { 0 };
+
     int len = sizeof(cliaddr);
 
     while (true) {
-
-        sersock = accept(sock, (SOCKADDR*)&cliaddr, &len);//연결 수락
-
-        if (sersock == -1)
-        {
+        serversock = accept(sock, (SOCKADDR*)&cliaddr, &len);
+        if (serversock == -1) {
             perror("Accept 실패");
-            return 0;
         }
-        printf("%s:%d의 연결 요청 수락\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
-        _beginthread(Game, 0, sersock, Cs);
+        else {
+            printf("%s:%d의 연결 요청 수락\n", inet_ntoa(cliaddr.sin_addr), ntohs(cliaddr.sin_port));
+            _beginthread(Game, 0, serversock);
+        }
     }
 
     closesocket(sock);
-    WSACleanup();
-
 }
 
 IN_ADDR GetDefaultMyIP()

@@ -1,19 +1,20 @@
 #define _CRT_SECURE_NO_WARNINGS
-#pragma warning(disable:4996)
 
-#include <winsock2.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <Windows.h>
+#include <winsock2.h>
 
 #include "game.h"
+#include "login.h"
 
 player_t s_players[NUM_MAX_PLAYERS];
 save_t s_saves[NUM_MAX_PLAYERS][NUM_MAX_SAVES_PER_PLAYER];
 
-int InitGame()
+int players_num;
+CRITICAL_SECTION CriticalSection;
+
+void InitGame()
 {
-	int players_num;
+	InitializeCriticalSectionAndSpinCount(&CriticalSection, 2000);
 
 	FILE* pb = fopen("player.bin", "rb");
 
@@ -22,11 +23,35 @@ int InitGame()
 		return;
 	}
 
-	return players_num = fread(s_players, sizeof(player_t), NUM_MAX_PLAYERS, pb);
+	players_num = fread(s_players, sizeof(player_t), NUM_MAX_PLAYERS, pb);
 }
 
-void Game(SOCKET sock, CRITICAL_SECTION Cs)
+int Game(SOCKET sock)
 {
-	EnterCriticalSection(&Cs);
-	LeaveCriticalSection(&Cs);
+	EnterCriticalSection(&CriticalSection);
+
+	int msg_int;
+
+	recv(sock, &msg_int, sizeof(msg_int), 0);
+
+	switch (msg_int) {
+		
+	case SIGNUP: {
+		SignUp(sock, players_num);
+		break;
+	}
+
+	case LOGIN: {
+		printf("·Î±×ÀÎ \n");
+		break;
+	}
+
+	}
+
+	LeaveCriticalSection(&CriticalSection);
+}
+
+void CloseGame()
+{
+	DeleteCriticalSection(&CriticalSection);
 }
