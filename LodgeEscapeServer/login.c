@@ -16,25 +16,23 @@ void SignUp(SOCKET sock, int s_num_players)
 		return;
 	}
 
-	int same = 0;
 	char msg_char[MAX_MSG_LEN] = "";
+	int same = 0;
 
 	player_t player;
 	do {
+		same = 0;
+
 		recv(sock, msg_char, MAX_MSG_LEN, 0);
-		send(sock, &s_num_players, sizeof(s_num_players), 0);
 
 		for (int i = 0; i < s_num_players; ++i) {
 			if (strcmp(msg_char, s_players[i].ID) == 0) {
-				same++;
-				send(sock, &same, sizeof(same), 0);
-			}
-
-			else {
-				same = 0;
-				send(sock, &same, sizeof(same), 0);
+				same = 1;
+				break;
 			}
 		}
+
+		send(sock, &same, sizeof(same), 0);
 	} while (same);
 
 	strcpy(player.ID, msg_char);
@@ -64,7 +62,25 @@ void SignUp(SOCKET sock, int s_num_players)
 	fclose(pb);
 }
 
-void Login()
+void Login(SOCKET sock, int s_num_players)
 {
+	int r_num;
+	int b_login = 1;
 
+	char ID[MAX_MSG_LEN] = "";
+	char Password[MAX_MSG_LEN] = "";
+
+	while(b_login) {
+		recv(sock, &ID, MAX_MSG_LEN, 0);
+		recv(sock, &Password, MAX_MSG_LEN, 0);
+
+		for (r_num = 0; r_num < s_num_players; ++r_num) {
+			if (strcmp(ID, s_players[r_num].ID) == 0 && strcmp(Password, s_players[r_num].password) == 0) {
+				b_login = 0;
+				break;
+			}
+		}
+
+		send(sock, &b_login, sizeof(b_login), 0);
+	}
 }
