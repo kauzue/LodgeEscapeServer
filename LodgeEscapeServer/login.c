@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+Ôªø#define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <Windows.h>
@@ -12,7 +12,7 @@ void SignUp(SOCKET sock, int s_num_players)
 {
 	FILE* pb = fopen("player.bin", "ab");
 	if (pb == NULL) {
-		puts("∆ƒ¿œø¿«¬ Ω«∆–!");
+		puts("ÌååÏùºÏò§Ìîà Ïã§Ìå®!");
 		return;
 	}
 
@@ -47,7 +47,7 @@ void SignUp(SOCKET sock, int s_num_players)
 			same++;
 			send(sock, &same, sizeof(same), 0);
 		}
-		
+
 		else {
 			same = 0;
 			send(sock, &same, sizeof(same), 0);
@@ -70,7 +70,7 @@ void Login(SOCKET sock, int s_num_players)
 	char ID[MAX_MSG_LEN] = "";
 	char Password[MAX_MSG_LEN] = "";
 
-	while(b_login) {
+	while (b_login) {
 		recv(sock, &ID, MAX_MSG_LEN, 0);
 		recv(sock, &Password, MAX_MSG_LEN, 0);
 

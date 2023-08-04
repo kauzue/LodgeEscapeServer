@@ -26,28 +26,26 @@ void InitGame()
 	players_num = fread(s_players, sizeof(player_t), NUM_MAX_PLAYERS, pb);
 }
 
-void Game(SOCKET sock)
+int Game(SOCKET sock)
 {
 	EnterCriticalSection(&CriticalSection);
 
-	int msg_int = 0;
+	int msg_int;
 
-	while(msg_int != 1 && msg_int != 2) {
-		recv(sock, &msg_int, sizeof(msg_int), 0);
+	recv(sock, &msg_int, sizeof(msg_int), 0);
 
-		switch (msg_int) {
+	switch (msg_int) {
+		
+	case SIGNUP: {
+		SignUp(sock, players_num);
+		break;
+	}
 
-		case SIGNUP: {
-			SignUp(sock, players_num);
-			break;
-		}
+	case LOGIN: {
+		printf("·Î±×ÀÎ \n");
+		break;
+	}
 
-		case LOGIN: {
-			Login(sock, players_num);
-			break;
-		}
-
-		}
 	}
 
 	LeaveCriticalSection(&CriticalSection);
