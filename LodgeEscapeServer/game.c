@@ -19,7 +19,7 @@ void InitGame()
 	FILE* pb = fopen("player.bin", "rb");
 
 	if (pb == NULL) {
-		puts("ÆÄÀÏ ¿ÀÇÂ ½ÇÆĞ");
+		puts("íŒŒì¼ ì˜¤í”ˆ ì‹¤íŒ¨");
 		return;
 	}
 
@@ -42,7 +42,7 @@ int Game(SOCKET sock)
 	}
 
 	case LOGIN: {
-		printf("·Î±×ÀÎ \n");
+		printf("ë¡œê·¸ì¸ \n");
 		break;
 	}
 
