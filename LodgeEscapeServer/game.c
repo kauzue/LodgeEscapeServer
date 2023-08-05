@@ -30,20 +30,57 @@ int Game(SOCKET sock)
 {
 	EnterCriticalSection(&CriticalSection);
 
-	int msg_int;
+	int msg_int = 1;
+	int r_num;
+
+	while(msg_int != -1) {
 
 	recv(sock, &msg_int, sizeof(msg_int), 0);
 
 	switch (msg_int) {
-		
+
 	case SIGNUP: {
-		SignUp(sock, players_num);
+		SignUp(sock, &players_num);
 		break;
 	}
 
 	case LOGIN: {
-		printf("로그인 \n");
+		r_num = Login(sock, players_num);
+		msg_int = -1;
 		break;
+	}
+
+	}
+	}
+
+	recv(sock, &msg_int, sizeof(msg_int), 0);
+
+	switch (msg_int) {
+
+	case START_GAME: {
+
+	}
+
+	case LOAD_GAME: {
+		send(sock, &s_players[r_num].s_num, NUM_MAX_SAVES_PER_PLAYER, 0);
+
+		if (s_players[r_num].s_num == 0) {
+
+		}
+
+		else {
+			msg_int = 0;
+
+			for (msg_int; msg_int < s_players[r_num].s_num; ++msg_int) {
+				send(sock, &s_saves[r_num][msg_int].chapter, NUM_MAX_SAVES_PER_PLAYER, 0);
+				send(sock, &s_saves[r_num][msg_int].stage, NUM_MAX_SAVES_PER_PLAYER, 0);
+			}
+
+		}
+	}
+
+	case OPTION: {
+
 	}
 
 	}

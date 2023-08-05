@@ -8,6 +8,7 @@ typedef struct player {
 	char ID[MAX_MSG_LEN];
 	char password[MAX_MSG_LEN];
 	int p_num;
+	int s_num;
 } player_t;
 
 typedef struct save {
@@ -26,6 +27,7 @@ typedef struct clue {
 } clue_t;
 
 enum LOG { SIGNUP, LOGIN};
+enum MAIN { START_GAME, LOAD_GAME, OPTION };
 
 void InitGame();
 int Game(SOCKET);
