@@ -55,6 +55,7 @@ void SignUp(SOCKET sock, int* s_num_players)
 	} while (same);
 
 	player.s_num = 0;
+	player.e_num = 0;
 
 	memcpy(&s_players[*s_num_players], &player, sizeof(player_t));
 	++(*s_num_players);

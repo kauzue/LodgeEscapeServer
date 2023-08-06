@@ -2,6 +2,7 @@
 
 #define NUM_MAX_PLAYERS 100
 #define NUM_MAX_SAVES_PER_PLAYER 20
+#define NUM_MAX_ENDINGS_PER_PLAYER 5
 #define MAX_MSG_LEN 256
 
 typedef struct player {
@@ -9,6 +10,7 @@ typedef struct player {
 	char password[MAX_MSG_LEN];
 	int p_num;
 	int s_num;
+	int e_num;
 } player_t;
 
 typedef struct save {
@@ -27,7 +29,8 @@ typedef struct clue {
 } clue_t;
 
 enum LOG { SIGNUP, LOGIN};
-enum MAIN { START_GAME, LOAD_GAME, OPTION };
+enum MAIN { START_GAME, LOAD_GAME, OPTION, ENDING, EXIT };
+enum OPTION { LOGIN_DATA, LOGOUT, BACK };
 
 void InitGame();
 int Game(SOCKET);

@@ -2,12 +2,14 @@
 
 #include <stdio.h>
 #include <winsock2.h>
+#include <stdbool.h>
 
 #include "game.h"
 #include "login.h"
 
 player_t s_players[NUM_MAX_PLAYERS];
 save_t s_saves[NUM_MAX_PLAYERS][NUM_MAX_SAVES_PER_PLAYER];
+ending_t s_endings[NUM_MAX_PLAYERS][NUM_MAX_ENDINGS_PER_PLAYER];
 
 int players_num;
 CRITICAL_SECTION CriticalSection;
@@ -19,7 +21,7 @@ void InitGame()
 	FILE* pb = fopen("player.bin", "rb");
 
 	if (pb == NULL) {
-		puts("ÌååÏùº Ïò§Ìîà Ïã§Ìå®");
+		puts("∆ƒ¿œø¿«¬ Ω«∆–");
 		return;
 	}
 
@@ -30,7 +32,7 @@ int Game(SOCKET sock)
 {
 	EnterCriticalSection(&CriticalSection);
 
-	int msg_int = 1;
+	START: int msg_int = 1;
 	int r_num;
 
 	while(msg_int != -1) {
@@ -53,39 +55,98 @@ int Game(SOCKET sock)
 	}
 	}
 
-	recv(sock, &msg_int, sizeof(msg_int), 0);
+	while (true) {
 
-	switch (msg_int) {
+		recv(sock, &msg_int, sizeof(msg_int), 0);
 
-	case START_GAME: {
+		switch (msg_int) {
 
-	}
-
-	case LOAD_GAME: {
-		send(sock, &s_players[r_num].s_num, NUM_MAX_SAVES_PER_PLAYER, 0);
-
-		if (s_players[r_num].s_num == 0) {
-
+		case START_GAME: {
+			break;
 		}
 
-		else {
-			msg_int = 0;
+		case LOAD_GAME: {
+			send(sock, &s_players[r_num].s_num, NUM_MAX_SAVES_PER_PLAYER, 0);
 
-			for (msg_int; msg_int < s_players[r_num].s_num; ++msg_int) {
-				send(sock, &s_saves[r_num][msg_int].chapter, NUM_MAX_SAVES_PER_PLAYER, 0);
-				send(sock, &s_saves[r_num][msg_int].stage, NUM_MAX_SAVES_PER_PLAYER, 0);
+			if (s_players[r_num].s_num == 0) {
+
 			}
 
+			else {
+				msg_int = 0;
+
+				for (msg_int; msg_int < s_players[r_num].s_num; ++msg_int) {
+					send(sock, &s_saves[r_num][msg_int].chapter, NUM_MAX_SAVES_PER_PLAYER, 0);
+					send(sock, &s_saves[r_num][msg_int].stage, NUM_MAX_SAVES_PER_PLAYER, 0);
+				}
+
+			}
+			break;
+		}
+
+		case OPTION: {
+			recv(sock, &msg_int, sizeof(msg_int), 0);
+
+			switch (msg_int) {
+				
+			case LOGIN_DATA: {
+				send(sock, s_players[r_num].ID, MAX_MSG_LEN, 0);
+				send(sock, s_players[r_num].password, MAX_MSG_LEN, 0);
+				send(sock, &s_players[r_num].p_num, sizeof(int), 0);
+				send(sock, &s_players[r_num].e_num, sizeof(int), 0);
+
+				break;
+			}
+
+			case LOGOUT: {
+				goto START;
+			}
+
+			case BACK: {
+				break;
+			}
+			}
+
+			break;
+		}
+
+		case ENDING: {
+
+			int ending_existence;
+
+			for (int i = 0; i < NUM_MAX_ENDINGS_PER_PLAYER; ++i) {
+
+				for (int j = 0; j < s_players[r_num].e_num; ++j) {
+
+					if (s_endings[r_num][j].number == i) {
+						ending_existence = j;
+						break;
+					}
+
+					else {
+						ending_existence = 0;
+					}
+				}
+
+				send(sock, &ending_existence, sizeof(ending_existence), 0);
+
+				if (ending_existence != 0) {
+					send(sock, s_endings[r_num][ending_existence].name, MAX_MSG_LEN, 0);
+				}
+
+			}
+
+			break;
+		}
+
+		case EXIT: {
+			goto EXIT;
+		}
+
 		}
 	}
 
-	case OPTION: {
-
-	}
-
-	}
-
-	LeaveCriticalSection(&CriticalSection);
+	EXIT: LeaveCriticalSection(&CriticalSection);
 }
 
 void CloseGame()
