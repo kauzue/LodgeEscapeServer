@@ -8,7 +8,7 @@
 
 player_t s_players[NUM_MAX_PLAYERS];
 
-void SignUp(SOCKET sock, int* s_num_players)
+int SignUp(SOCKET sock, int* s_num_players)
 {
 	FILE* pb = fopen("player.bin", "ab");
 	if (pb == NULL) {
@@ -24,6 +24,9 @@ void SignUp(SOCKET sock, int* s_num_players)
 		same = 0;
 
 		recv(sock, msg_char, MAX_MSG_LEN, 0);
+		if (!strcmp(msg_char, "0")) {
+			goto END_SIGNUP;
+		}
 
 		for (int i = 0; i < *s_num_players; ++i) {
 			if (strcmp(msg_char, s_players[i].ID) == 0) {
@@ -38,20 +41,19 @@ void SignUp(SOCKET sock, int* s_num_players)
 	strcpy(player.ID, msg_char);
 
 	recv(sock, msg_char, MAX_MSG_LEN, 0);
+	if (!strcmp(msg_char, "0")) {
+		goto END_SIGNUP;
+	}
+
 	strcpy(player.password, msg_char);
 
 	do {
 		recv(sock, &player.p_num, sizeof(player.p_num), 0);
-
-		if (player.p_num != 1 && player.p_num != 2) {
-			same++;
-			send(sock, &same, sizeof(same), 0);
+		if (player.p_num == 0) {
+			goto END_SIGNUP;
 		}
-
-		else {
-			same = 0;
-			send(sock, &same, sizeof(same), 0);
-		}
+		
+		recv(sock, &same, sizeof(same), 0);
 	} while (same);
 
 	player.s_num = 0;
@@ -63,6 +65,11 @@ void SignUp(SOCKET sock, int* s_num_players)
 	fwrite(&player, sizeof(player_t), 1, pb);
 
 	fclose(pb);
+	return 1;
+
+END_SIGNUP:
+	fclose(pb);
+	return 0;
 }
 
 int Login(SOCKET sock, int s_num_players)
@@ -75,7 +82,13 @@ int Login(SOCKET sock, int s_num_players)
 
 	while (!b_login) {
 		recv(sock, &ID, MAX_MSG_LEN, 0);
+		if (!strcmp(ID, "0")) {
+			return -2;
+		}
 		recv(sock, &Password, MAX_MSG_LEN, 0);
+		if (!strcmp(Password, "0")) {
+			return -2;
+		}
 
 		for (r_num = 0; r_num < s_num_players; ++r_num) {
 			if (strcmp(ID, s_players[r_num].ID) == 0 && strcmp(Password, s_players[r_num].password) == 0) {

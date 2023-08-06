@@ -32,8 +32,12 @@ int Game(SOCKET sock)
 {
 	EnterCriticalSection(&CriticalSection);
 
-	START: int msg_int = 1;
+	int msg_int;
 	int r_num;
+
+START:
+
+	msg_int = 1;
 
 	while(msg_int != -1) {
 
@@ -42,12 +46,20 @@ int Game(SOCKET sock)
 	switch (msg_int) {
 
 	case SIGNUP: {
-		SignUp(sock, &players_num);
+		msg_int = SignUp(sock, &players_num);
+		if (msg_int == 0) {
+			goto EXIT;
+		}
+
 		break;
 	}
 
 	case LOGIN: {
 		r_num = Login(sock, players_num);
+		if (r_num == -2) {
+			goto EXIT;
+		}
+
 		msg_int = -1;
 		break;
 	}
