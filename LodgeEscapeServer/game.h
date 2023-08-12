@@ -1,6 +1,7 @@
 #pragma once
 
 #define NUM_MAX_PLAYERS 100
+#define NUM_MAX_ROOMS 10000
 #define NUM_MAX_SAVES_PER_PLAYER 20
 #define NUM_MAX_ENDINGS_PER_PLAYER 5
 #define MAX_MSG_LEN 256
@@ -12,6 +13,12 @@ typedef struct player {
 	int s_num;
 	int e_num;
 } player_t;
+
+typedef struct room {
+	char r_name[MAX_MSG_LEN];
+	int r_password;
+	int r_player;
+} room_t;
 
 typedef struct save {
 	int stage;
@@ -30,6 +37,7 @@ typedef struct clue {
 
 enum LOG { SIGNUP, LOGIN};
 enum MAIN { START_GAME, LOAD_GAME, OPTION, ENDING, EXIT };
+enum ROOM {CREATE, FIND};
 enum OPTION { LOGIN_DATA, LOGOUT, BACK };
 
 void InitGame();
