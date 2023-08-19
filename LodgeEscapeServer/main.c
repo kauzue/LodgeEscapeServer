@@ -5,7 +5,5 @@ int main()
 {
 	InitGame();
 	StartWinsock();
-
-	CloseGame();
 	return 0;
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #define NUM_MAX_PLAYERS 100
-#define NUM_MAX_ROOMS 10000
+#define NUM_MAX_ROOMS 10
 #define NUM_MAX_SAVES_PER_PLAYER 20
 #define NUM_MAX_ENDINGS_PER_PLAYER 5
 #define MAX_MSG_LEN 256
@@ -17,7 +17,7 @@ typedef struct player {
 typedef struct room {
 	char r_name[MAX_MSG_LEN];
 	int r_password;
-	int r_player;
+	int player_num;
 } room_t;
 
 typedef struct save {
