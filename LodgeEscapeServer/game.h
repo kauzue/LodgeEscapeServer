@@ -42,4 +42,3 @@ enum OPTION { LOGIN_DATA, LOGOUT, BACK };
 
 void InitGame();
 int Game(SOCKET);
-void CloseGame();

@@ -6,6 +6,7 @@
 
 #include "game.h"
 #include "login.h"
+#include "story.h"
 
 player_t s_players[NUM_MAX_PLAYERS];
 room_t s_rooms[NUM_MAX_ROOMS];
@@ -219,6 +220,8 @@ void CreateRoom(SOCKET sock)
 
 	++(rooms_num);
 
+	send(sock, &r_p_num, sizeof(r_p_num), 0);
+
 	WaitRoom(sock);
 }
 
@@ -268,13 +271,32 @@ void FindRoom(SOCKET sock)
 
 	s_rooms[r_r_num].player_num += s_players[r_p_num].p_num;
 
+	send(sock, &r_p_num, sizeof(r_p_num), 0);
+
 	WaitRoom(sock);
 }
 
 void WaitRoom(SOCKET sock)
 {
-	send(sock, &s_rooms[r_r_num].player_num, sizeof(int), 0);
-	while (s_rooms[r_r_num].player_num < 3) {
-		send(sock, &s_rooms[r_r_num].player_num, sizeof(int), 0);
+	int msg_int;
+
+	while (true) {
+		if (s_rooms[r_r_num].player_num == 3) {
+			break;
+		}
 	}
+	send(sock, &s_players[r_p_num].p_num, sizeof(int), 0);
+	recv(sock, &msg_int, sizeof(msg_int), 0);
+	send(sock, &s_players[msg_int].p_num, sizeof(s_players[msg_int].p_num), 0);
+
+	r_p_num = msg_int;
+
+	if (s_players[r_p_num].p_num == 1) {
+		Chapter1_Player1(sock, r_p_num);	
+	}
+
+	else {
+		Chapter1_Player2(sock, r_p_num);
+	}
+
 }
