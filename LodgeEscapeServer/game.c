@@ -25,6 +25,8 @@ void WaitRoom(SOCKET);
 
 void InitGame()
 {
+	InitializeCriticalSectionAndSpinCount(&CriticalSection, 10000);
+
 	FILE* pb = fopen("player.bin", "rb");
 
 	if (pb == NULL) {
@@ -184,6 +186,8 @@ int Game(SOCKET sock)
 
 void CreateRoom(SOCKET sock)
 {
+	EnterCriticalSection(&CriticalSection);
+
 	char msg_char[MAX_MSG_LEN] = "";
 	int same = 0;
 
@@ -222,11 +226,15 @@ void CreateRoom(SOCKET sock)
 
 	send(sock, &r_p_num, sizeof(r_p_num), 0);
 
+	LeaveCriticalSection(&CriticalSection);
+
 	WaitRoom(sock);
 }
 
 void FindRoom(SOCKET sock)
 {
+	EnterCriticalSection(&CriticalSection);
+
 	int msg_int;
 
 	send(sock, &rooms_num, sizeof(rooms_num), 0);
@@ -241,7 +249,7 @@ void FindRoom(SOCKET sock)
 
 	recv(sock, &msg_int, sizeof(msg_int), 0);
 
-	if (msg_int < 0) {
+	if (msg_int < 0 || msg_int > rooms_num) {
 		return;
 	}
 
@@ -273,6 +281,8 @@ void FindRoom(SOCKET sock)
 
 	send(sock, &r_p_num, sizeof(r_p_num), 0);
 
+	LeaveCriticalSection(&CriticalSection);
+
 	WaitRoom(sock);
 }
 
@@ -292,11 +302,11 @@ void WaitRoom(SOCKET sock)
 	r_p_num = msg_int;
 
 	if (s_players[r_p_num].p_num == 1) {
-		Chapter1_Player1(sock, r_p_num);	
+		r_p_num = Chapter1_Player1(sock, r_p_num);	
 	}
 
 	else {
-		Chapter1_Player2(sock, r_p_num);
+		r_p_num =  Chapter1_Player2(sock, r_p_num);
 	}
 
 }

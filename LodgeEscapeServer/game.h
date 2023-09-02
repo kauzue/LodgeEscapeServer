@@ -2,6 +2,8 @@
 
 #define NUM_MAX_PLAYERS 100
 #define NUM_MAX_ROOMS 10
+#define NUM_MAX_ITEMS 10
+#define NUM_MAX_CLUES 10
 #define NUM_MAX_SAVES_PER_PLAYER 20
 #define NUM_MAX_ENDINGS_PER_PLAYER 5
 #define MAX_MSG_LEN 256
@@ -29,6 +31,11 @@ typedef struct ending {
 	int number;
 	char name[MAX_MSG_LEN];
 } ending_t;
+
+typedef struct item {
+	char name[MAX_MSG_LEN];
+	char information[MAX_MSG_LEN];
+} item_t;
 
 typedef struct clue {
 	char name[MAX_MSG_LEN];
