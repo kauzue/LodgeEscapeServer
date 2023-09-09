@@ -13,11 +13,12 @@ room_t s_rooms[NUM_MAX_ROOMS];
 save_t s_saves[NUM_MAX_PLAYERS][NUM_MAX_SAVES_PER_PLAYER];
 ending_t s_endings[NUM_MAX_PLAYERS][NUM_MAX_ENDINGS_PER_PLAYER];
 
+CRITICAL_SECTION CriticalSection;
+
 int players_num;
 int r_p_num;
 int r_r_num;
 int rooms_num = 0;
-CRITICAL_SECTION CriticalSection;
 
 void CreateRoom(SOCKET);
 void FindRoom(SOCKET);
@@ -25,7 +26,7 @@ void WaitRoom(SOCKET);
 
 void InitGame()
 {
-	InitializeCriticalSectionAndSpinCount(&CriticalSection, 10000);
+	InitializeCriticalSectionAndSpinCount(&CriticalSection, 2000);
 
 	FILE* pb = fopen("player.bin", "rb");
 
@@ -199,7 +200,7 @@ void CreateRoom(SOCKET sock)
 		if (!strcmp(msg_char, "0")) {
 			same = -1;
 			send(sock, &same, sizeof(same), 0);
-			return;
+			goto error_exit_create_room;
 		}
 
 		for (int i = 0; i < rooms_num; i++) {
@@ -229,6 +230,11 @@ void CreateRoom(SOCKET sock)
 	LeaveCriticalSection(&CriticalSection);
 
 	WaitRoom(sock);
+	return;
+
+error_exit_create_room:
+	LeaveCriticalSection(&CriticalSection);
+
 }
 
 void FindRoom(SOCKET sock)
@@ -240,7 +246,7 @@ void FindRoom(SOCKET sock)
 	send(sock, &rooms_num, sizeof(rooms_num), 0);
 
 	if (rooms_num == 0) {
-		return 0;
+		goto error_not_fount_room;
 	}
 
 	for (int i = 0; i < rooms_num; i++) {
@@ -250,13 +256,13 @@ void FindRoom(SOCKET sock)
 	recv(sock, &msg_int, sizeof(msg_int), 0);
 
 	if (msg_int < 0 || msg_int > rooms_num) {
-		return;
+		goto error_not_fount_room;
 	}
 
 	else if (s_rooms[msg_int].player_num == s_players[r_p_num].p_num) {
 		msg_int = 1;
 		send(sock, &msg_int, sizeof(msg_int), 0);
-		return;
+		goto error_not_fount_room;
 	}
 
 	else {
@@ -274,7 +280,7 @@ void FindRoom(SOCKET sock)
 	else {
 		msg_int = 0;
 		send(sock, &msg_int, sizeof(msg_int), 0);
-		return;
+		goto error_not_fount_room;
 	}
 
 	s_rooms[r_r_num].player_num += s_players[r_p_num].p_num;
@@ -284,11 +290,17 @@ void FindRoom(SOCKET sock)
 	LeaveCriticalSection(&CriticalSection);
 
 	WaitRoom(sock);
+	return;
+
+error_not_fount_room:
+	LeaveCriticalSection(&CriticalSection);
+
 }
 
 void WaitRoom(SOCKET sock)
 {
 	int msg_int;
+	int delete_rooms = 1;
 
 	while (true) {
 		if (s_rooms[r_r_num].player_num == 3) {
@@ -301,12 +313,27 @@ void WaitRoom(SOCKET sock)
 
 	r_p_num = msg_int;
 
+	if (delete_rooms == r_p_num) {
+		for (int i = rooms_num; i > rooms_num - r_r_num; i--) {
+			s_rooms[i - 1].player_num = s_rooms[i].player_num;
+			strcpy(s_rooms[i - 1].r_name, s_rooms[i].r_name);
+			s_rooms[i - 1].r_password = s_rooms[i].r_password;
+		}
+		rooms_num--;
+	}
+
+
 	if (s_players[r_p_num].p_num == 1) {
-		r_p_num = Chapter1_Player1(sock, r_p_num);	
+		r_p_num = Chapter1_Player1(sock, r_p_num);
 	}
 
 	else {
 		r_p_num =  Chapter1_Player2(sock, r_p_num);
 	}
 
+}
+
+void CloseGame()
+{
+	DeleteCriticalSection(&CriticalSection);
 }

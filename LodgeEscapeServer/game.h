@@ -2,11 +2,12 @@
 
 #define NUM_MAX_PLAYERS 100
 #define NUM_MAX_ROOMS 10
-#define NUM_MAX_ITEMS 10
-#define NUM_MAX_CLUES 10
+#define NUM_MAX_ITEMS_PER_PLAYER 10
+#define NUM_MAX_CLUES_PER_PLAYER 10
 #define NUM_MAX_SAVES_PER_PLAYER 20
 #define NUM_MAX_ENDINGS_PER_PLAYER 5
 #define MAX_MSG_LEN 256
+
 
 typedef struct player {
 	char ID[MAX_MSG_LEN];
@@ -49,3 +50,4 @@ enum OPTION { LOGIN_DATA, LOGOUT, BACK };
 
 void InitGame();
 int Game(SOCKET);
+void CloseGame();
